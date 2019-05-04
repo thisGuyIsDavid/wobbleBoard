@@ -3,8 +3,7 @@ import smbus
 import math
 import time
 import sqlite3
-#   CREATE TABLE wobble_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, x NUMERIC, y NUMERIC, z NUMERIC, currentdate DATE, currentime TIME);
-#   INSERT INTO dhtreadings(temperature, humidity, currentdate, currentime, device) values(22.4, 48, date('now'), time('now'), "manual");
+#   CREATE TABLE wobble_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, x NUMERIC, y NUMERIC, z NUMERIC, insert_time TEXT);
 
 # Register
 power_mgmt_1 = 0x6b
@@ -50,7 +49,7 @@ def get_z_rotation(x, y, z):
 
 bus = smbus.SMBus(1)
 address = 0x68
-
+import datetime
 
 bus.write_byte_data(address, power_mgmt_1, 0)
 conn = sqlite3.connect('sensordata.db')
@@ -64,7 +63,9 @@ while True:
     z_rotation = get_z_rotation(x_scaled, y_scaled, z_scaled)
 
     c = conn.cursor()
-    c.execute("INSERT INTO wobble_readings(x, y, z) VALUES (%s, %s, %s)" % (x_rotation, y_rotation, z_rotation))
+    c.execute(
+        "INSERT INTO wobble_readings(x, y, z, insert_time) VALUES (%s, %s, %s, %s)"
+        % (x_rotation, y_rotation, z_rotation, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     conn.commit()
     print(x_rotation, y_rotation, z_rotation)
 
