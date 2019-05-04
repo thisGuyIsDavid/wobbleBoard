@@ -66,7 +66,7 @@ while True:
     print(now)
     c = conn.cursor()
     c.execute(
-        "INSERT INTO wobble_readings(x, y, z, insert_time) VALUES (%s, %s, %s, %s)"
+        "INSERT INTO wobble_readings(x, y, z, insert_time) VALUES (%s, %s, %s, '%s')"
         % (x_rotation, y_rotation, z_rotation, str(now))
     )
     conn.commit()
