@@ -62,10 +62,13 @@ while True:
     y_rotation = get_y_rotation(x_scaled, y_scaled, z_scaled)
     z_rotation = get_z_rotation(x_scaled, y_scaled, z_scaled)
 
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(now)
     c = conn.cursor()
     c.execute(
         "INSERT INTO wobble_readings(x, y, z, insert_time) VALUES (%s, %s, %s, %s)"
-        % (x_rotation, y_rotation, z_rotation, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        % (x_rotation, y_rotation, z_rotation, str(now))
+    )
     conn.commit()
     print(x_rotation, y_rotation, z_rotation)
 
