@@ -64,7 +64,7 @@ while True:
     z_rotation = get_z_rotation(x_scaled, y_scaled, z_scaled)
 
     c = conn.cursor()
-    c.execute("INSERT INTO wobble_readings(x, y, z) VALUES (%(x)s,%(y)s,%(z)s)")
+    c.execute("INSERT INTO wobble_readings(x, y, z) VALUES (%s, %s, %s)" % (x_rotation, y_rotation, z_rotation))
 
     print(x_rotation, y_rotation, z_rotation)
 
