@@ -53,23 +53,29 @@ import datetime
 
 bus.write_byte_data(address, power_mgmt_1, 0)
 conn = sqlite3.connect('sensordata.db')
-while True:
-    x_scaled = read_word_2c(0x3b) / 16384.0
-    y_scaled = read_word_2c(0x3d) / 16384.0
-    z_scaled = read_word_2c(0x3f) / 16384.0
+try:
+    while True:
+        x_scaled = read_word_2c(0x3b) / 16384.0
+        y_scaled = read_word_2c(0x3d) / 16384.0
+        z_scaled = read_word_2c(0x3f) / 16384.0
 
-    x_rotation = get_x_rotation(x_scaled, y_scaled, z_scaled)
-    y_rotation = get_y_rotation(x_scaled, y_scaled, z_scaled)
-    z_rotation = get_z_rotation(x_scaled, y_scaled, z_scaled)
+        x_rotation = get_x_rotation(x_scaled, y_scaled, z_scaled)
+        y_rotation = get_y_rotation(x_scaled, y_scaled, z_scaled)
+        z_rotation = get_z_rotation(x_scaled, y_scaled, z_scaled)
 
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(now)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO wobble_readings(x, y, z, insert_time) VALUES (%s, %s, %s, '%s')"
-        % (x_rotation, y_rotation, z_rotation, str(now))
-    )
-    conn.commit()
-    print(x_rotation, y_rotation, z_rotation)
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(now)
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO wobble_readings(x, y, z, insert_time) VALUES (%s, %s, %s, '%s')"
+            % (x_rotation, y_rotation, z_rotation, str(now))
+        )
+        conn.commit()
+        print(x_rotation, y_rotation, z_rotation)
 
-    time.sleep(.5)
+        time.sleep(.5)
+except KeyboardInterrupt:
+    pass
+finally:
+    bus.close()
+    conn.close()
