@@ -3,78 +3,93 @@ import smbus
 import math
 import time
 import sqlite3
-#   CREATE TABLE wobble_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, x NUMERIC, y NUMERIC, z NUMERIC, insert_time TEXT);
-
-# Register
-power_mgmt_1 = 0x6b
-
-
-def read_byte(reg):
-    return bus.read_byte_data(address, reg)
-
-
-def read_word(reg):
-    h = bus.read_byte_data(address, reg)
-    l = bus.read_byte_data(address, reg + 1)
-    value = (h << 8) + l
-    return value
-
-
-def read_word_2c(reg):
-    val = read_word(reg)
-    if val >= 0x8000:
-        return -((65535 - val) + 1)
-    else:
-        return val
-
-
-def dist(a, b):
-    return math.sqrt((a * a) + (b * b))
-
-
-def get_y_rotation(x, y, z):
-    radians = math.atan2(x, dist(y, z))
-    return -math.degrees(radians)
-
-
-def get_x_rotation(x, y, z):
-    radians = math.atan2(y, dist(x, z))
-    return math.degrees(radians)
-
-
-def get_z_rotation(x, y, z):
-    radians = math.atan2(z, dist(y, x))
-    return math.degrees(radians)
-
-
-bus = smbus.SMBus(1)
-address = 0x68
 import datetime
 
-bus.write_byte_data(address, power_mgmt_1, 0)
-conn = sqlite3.connect('sensordata.db')
-try:
-    while True:
-        x_scaled = read_word_2c(0x3b) / 16384.0
-        y_scaled = read_word_2c(0x3d) / 16384.0
-        z_scaled = read_word_2c(0x3f) / 16384.0
+#   CREATE TABLE wobble_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, x NUMERIC, y NUMERIC, z NUMERIC, insert_time TEXT);
 
-        x_rotation = get_x_rotation(x_scaled, y_scaled, z_scaled)
-        y_rotation = get_y_rotation(x_scaled, y_scaled, z_scaled)
-        z_rotation = get_z_rotation(x_scaled, y_scaled, z_scaled)
 
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        c = conn.cursor()
+class WobbleReader:
+
+    def __init__(self):
+        self.last_key = None
+        self.bus = smbus.SMBus(1)
+        self.address = 0x68
+        self.bus.write_byte_data(0x68, 0x6b, 0)
+        self.conn = sqlite3.connect('sensordata.db')
+
+    def read_byte(self, reg):
+        return self.bus.read_byte_data(self.address, reg)
+
+    def read_word(self, reg):
+        h = self.bus.read_byte_data(self.address, reg)
+        l = self.bus.read_byte_data(self.address, reg + 1)
+        value = (h << 8) + l
+        return value
+
+    def read_word_2c(self, reg):
+        val = self.read_word(reg)
+        if val >= 0x8000:
+            return -((65535 - val) + 1)
+        else:
+            return val
+
+    @staticmethod
+    def dist(a, b):
+        return math.sqrt((a * a) + (b * b))
+
+    @staticmethod
+    def get_y_rotation(x, y, z):
+        radians = math.atan2(x, WobbleReader.dist(y, z))
+        return -math.degrees(radians)
+
+    @staticmethod
+    def get_x_rotation(x, y, z):
+        radians = math.atan2(y, WobbleReader.dist(x, z))
+        return math.degrees(radians)
+
+    @staticmethod
+    def get_z_rotation(x, y, z):
+        radians = math.atan2(z, WobbleReader.dist(y, x))
+        return math.degrees(radians)
+
+    def insert(self, x, y, z):
+        c = self.conn.cursor()
         c.execute(
-            "INSERT INTO wobble_readings(x, y, z, insert_time) VALUES (%s, %s, %s, '%s')"
-            % (x_rotation, y_rotation, z_rotation, str(now))
-        )
-        conn.commit()
-        print(x_rotation, y_rotation, z_rotation)
+            """
+            INSERT INTO wobble_readings(
+            x, y, z, insert_time
+            ) VALUES (
+            %s, %s, %s, '%s'
+            )""" % (x, y, z, str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))))
+        self.conn.commit()
 
-        time.sleep(.5)
-except KeyboardInterrupt:
-    pass
-finally:
-    bus.close()
-    conn.close()
+    def process(self):
+        while True:
+            x_scaled = self.read_word_2c(0x3b) / 16384.0
+            y_scaled = self.read_word_2c(0x3d) / 16384.0
+            z_scaled = self.read_word_2c(0x3f) / 16384.0
+
+            x_rotation = self.get_x_rotation(x_scaled, y_scaled, z_scaled)
+            y_rotation = self.get_y_rotation(x_scaled, y_scaled, z_scaled)
+            z_rotation = self.get_z_rotation(x_scaled, y_scaled, z_scaled)
+
+            #   set keys
+            key = "%s_%s_%s" % (x_rotation, y_rotation, z_rotation)
+            if self.last_key == key:
+                continue
+            else:
+                self.last_key = key
+
+            self.insert(x_rotation, y_rotation, z_rotation)
+            time.sleep(.25)
+
+    def run(self):
+        try:
+            self.process()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.bus.close()
+            self.conn.close()
+
+WobbleReader().run()
