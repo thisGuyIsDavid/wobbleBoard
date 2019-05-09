@@ -4,6 +4,8 @@ import math
 import time
 import sqlite3
 import datetime
+import RPi.GPIO as GPIO
+from time import sleep
 
 #   CREATE TABLE wobble_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, x NUMERIC, y NUMERIC, z NUMERIC, insert_time TEXT);
 
@@ -16,6 +18,9 @@ class WobbleReader:
         self.address = 0x68
         self.bus.write_byte_data(0x68, 0x6b, 0)
         self.conn = sqlite3.connect('sensordata.db')
+
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(4, GPIO.OUT, initial=GPIO.LOW)
 
     def read_byte(self, reg):
         return self.bus.read_byte_data(self.address, reg)
@@ -64,6 +69,7 @@ class WobbleReader:
         self.conn.commit()
 
     def process(self):
+        GPIO.output(8, GPIO.HIGH)
         while True:
             x_scaled = self.read_word_2c(0x3b) / 16384.0
             y_scaled = self.read_word_2c(0x3d) / 16384.0
@@ -91,5 +97,7 @@ class WobbleReader:
         finally:
             self.bus.close()
             self.conn.close()
+            GPIO.output(8, GPIO.LOW)
+            GPIO.cleanup()
 
 WobbleReader().run()

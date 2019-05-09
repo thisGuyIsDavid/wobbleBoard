@@ -5,6 +5,7 @@ from matplotlib import cm
 from matplotlib import animation
 plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg'
 
+
 class WobbleGraph:
     wobble_data = []
     ax = None
