@@ -1,3 +1,6 @@
 .idea/
 venv/
 venv3/
+*.html
+*.mp4
+*.db
