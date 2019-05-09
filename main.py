@@ -20,7 +20,7 @@ class WobbleReader:
         self.conn = sqlite3.connect('sensordata.db')
 
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(4, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(24, GPIO.OUT, initial=GPIO.LOW)
 
     def read_byte(self, reg):
         return self.bus.read_byte_data(self.address, reg)
@@ -69,7 +69,7 @@ class WobbleReader:
         self.conn.commit()
 
     def process(self):
-        GPIO.output(8, GPIO.HIGH)
+        GPIO.output(24, GPIO.HIGH)
         while True:
             x_scaled = self.read_word_2c(0x3b) / 16384.0
             y_scaled = self.read_word_2c(0x3d) / 16384.0
@@ -97,7 +97,7 @@ class WobbleReader:
         finally:
             self.bus.close()
             self.conn.close()
-            GPIO.output(8, GPIO.LOW)
+            GPIO.output(24, GPIO.LOW)
             GPIO.cleanup()
 
 WobbleReader().run()
