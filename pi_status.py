@@ -8,7 +8,7 @@ try:
 
 	GPIO.output(23, GPIO.HIGH)
 	while True:
-		if GPIO.input(25):  # if port 25 == 1
+		if not GPIO.input(25):  # if port 25 == 1
 			print("Port 25 is 1/HIGH/True - LED ON")
 		time.sleep(1)
 except KeyboardInterrupt:
