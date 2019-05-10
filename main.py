@@ -100,4 +100,3 @@ class WobbleReader:
             GPIO.output(24, GPIO.LOW)
             GPIO.cleanup()
 
-WobbleReader().run()
