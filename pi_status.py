@@ -4,7 +4,7 @@ import subprocess
 try:
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(23, GPIO.OUT, initial=GPIO.LOW)
-	GPIO.setup(25, GPIO.IN, initial=GPIO.LOW)
+	GPIO.setup(25, GPIO.IN)
 
 	GPIO.output(23, GPIO.HIGH)
 	while True:
