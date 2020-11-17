@@ -81,12 +81,12 @@ class WobbleReader:
 
             #   set keys
             key = "%s_%s_%s" % (x_rotation, y_rotation, z_rotation)
+            print(key)
             if self.last_key == key:
                 continue
             else:
                 self.last_key = key
-
-            self.insert(x_rotation, y_rotation, z_rotation)
+            #   self.insert(x_rotation, y_rotation, z_rotation)
             time.sleep(.25)
 
     def run(self):
@@ -100,4 +100,9 @@ class WobbleReader:
             GPIO.output(24, GPIO.LOW)
             GPIO.cleanup()
 
-WobbleReader().run()
+#   WobbleReader().run()
+
+print('%02x:' * 256)
+
+for i in range(256):
+    "  sprintf(addr, "", data[offset+0], data[offset+1], data[offset+2], data[offset+3], data[offset+4], data[offset+5]);"
