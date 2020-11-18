@@ -79,6 +79,8 @@ class WobbleReader:
             y_rotation = self.get_y_rotation(x_scaled, y_scaled, z_scaled)
             z_rotation = self.get_z_rotation(x_scaled, y_scaled, z_scaled)
 
+            print((x_rotation, y_rotation, z_rotation))
+            return
             #   set keys
             key = "%s_%s_%s" % (x_rotation, y_rotation, z_rotation)
             print(key)
@@ -100,9 +102,4 @@ class WobbleReader:
             GPIO.output(24, GPIO.LOW)
             GPIO.cleanup()
 
-#   WobbleReader().run()
-
-print('%02x:' * 256)
-
-for i in range(256):
-    "  sprintf(addr, "", data[offset+0], data[offset+1], data[offset+2], data[offset+3], data[offset+4], data[offset+5]);"
+WobbleReader().run()
