@@ -6,6 +6,7 @@ import sqlite3
 import datetime
 import RPi.GPIO as GPIO
 from time import sleep
+from calibrate import Calibration
 
 #   CREATE TABLE wobble_readings(id INTEGER PRIMARY KEY AUTOINCREMENT, x NUMERIC, y NUMERIC, z NUMERIC, insert_time TEXT);
 
@@ -18,6 +19,7 @@ class WobbleReader:
         self.address = 0x68
         self.bus.write_byte_data(0x68, 0x6b, 0)
         self.conn = sqlite3.connect('sensordata.db')
+        self.calibration = Calibration()
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(24, GPIO.OUT, initial=GPIO.LOW)
@@ -79,15 +81,8 @@ class WobbleReader:
             y_rotation = self.get_y_rotation(x_scaled, y_scaled, z_scaled)
             z_rotation = self.get_z_rotation(x_scaled, y_scaled, z_scaled)
 
-
-            #   set keys
-            key = "%s|%s|%s" % (x_rotation, y_rotation, z_rotation)
-            if self.last_key == key:
-                continue
-            else:
-                self.last_key = key
-            #   self.insert(x_rotation, y_rotation, z_rotation)
-            print(key)
+            x, y, z, is_calibrated = self.calibration.get_value(x_rotation, y_rotation, z_rotation)
+            print(x, y, z, is_calibrated)
             time.sleep(.25)
 
     def run(self):
