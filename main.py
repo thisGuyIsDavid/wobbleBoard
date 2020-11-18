@@ -82,7 +82,6 @@ class WobbleReader:
 
             #   set keys
             key = "%s_%s_%s" % (x_rotation, y_rotation, z_rotation)
-            print(key)
             if self.last_key == key:
                 continue
             else:
