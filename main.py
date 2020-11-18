@@ -80,7 +80,7 @@ class WobbleReader:
             z_rotation = self.get_z_rotation(x_scaled, y_scaled, z_scaled)
 
             print((x_rotation, y_rotation, z_rotation))
-            return
+            continue
             #   set keys
             key = "%s_%s_%s" % (x_rotation, y_rotation, z_rotation)
             print(key)
