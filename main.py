@@ -79,8 +79,7 @@ class WobbleReader:
             y_rotation = self.get_y_rotation(x_scaled, y_scaled, z_scaled)
             z_rotation = self.get_z_rotation(x_scaled, y_scaled, z_scaled)
 
-            print((x_rotation, y_rotation, z_rotation))
-            continue
+
             #   set keys
             key = "%s_%s_%s" % (x_rotation, y_rotation, z_rotation)
             print(key)
@@ -89,6 +88,7 @@ class WobbleReader:
             else:
                 self.last_key = key
             #   self.insert(x_rotation, y_rotation, z_rotation)
+            print((x_rotation, y_rotation, z_rotation))
             time.sleep(.25)
 
     def run(self):
