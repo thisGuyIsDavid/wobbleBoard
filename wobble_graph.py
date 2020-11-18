@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib import animation
 plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg'
+import json
 
 
 class WobbleGraph:
@@ -12,6 +13,7 @@ class WobbleGraph:
 
     def __init__(self, high_def=False):
         self.set_data()
+        self.create_json()
         self.max_count = max([wobble_point.get('count') for wobble_point in self.wobble_data])
 
         self.fig = plt.figure()
@@ -22,6 +24,7 @@ class WobbleGraph:
             dpi = 300
         else:
             dpi = 72
+
         anim.save('index.mp4', bitrate=102400, dpi=dpi, fps=25)
 
     def set_data(self):
@@ -79,13 +82,31 @@ class WobbleGraph:
 
     def plot_data(self):
         viridis = cm.get_cmap('hsv', 12)
-        print(self.wobble_data)
 
         xs = [value.get('x') for value in self.wobble_data]
         ys = [value.get('y') for value in self.wobble_data]
         zs = [value.get('z') for value in self.wobble_data]
         cs = [value.get('scaled') for value in self.wobble_data]
         self.ax.scatter(xs, ys, zs, c=cs, cmap=viridis, marker='o', alpha=0.4)
+
+    def create_json(self):
+        coordinates = [
+            {
+                'x': value.get('x'),
+                'y': value.get('y'),
+                'z': value.get('z')
+            } for value in self.wobble_data
+        ]
+        json_file = {
+            "count": len(coordinates),
+            "data": coordinates
+        }
+
+
+        with open('wobble_data.json', 'w') as wobble_data:
+            wobble_data.write(json.dumps(json_file))
+
+
 
     def animate(self, i):
         self.ax.azim += 1
